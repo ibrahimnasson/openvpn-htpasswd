@@ -15,7 +15,7 @@ int main (int argc, char *argv[]) {
   // Exit if there isn't exactly 1 argument
   if(argc != 2) {
     printf("Too many or too few arguments. Exiting.\n");
-    return(1);
+    exit(1);
   }
 
   // Load the temporary file from OpenVPN and get the username and password
@@ -23,7 +23,7 @@ int main (int argc, char *argv[]) {
   openvpn_file_ptr = fopen(file_flag_ptr, "r");
   if (openvpn_file_ptr == NULL) {
     printf("Error reading from file %s: %s\n", file_flag_ptr, strerror(errno));
-    return(1);
+    exit(1);
   }
   for (openvpn_file_counter=0; openvpn_file_counter<2; ++openvpn_file_counter) {
     if (openvpn_file_counter == 0) {
@@ -63,4 +63,6 @@ int main (int argc, char *argv[]) {
   } else {
     printf("Password is bad :(.\n");
   }
+
+  return 0;
 } 

@@ -47,13 +47,10 @@ int main (int argc, char *argv[]) {
   // Find the line in the htpasswd file that matches the username from OpenVPN
   while (fgets(line, sizeof(line), htpasswd_file_ptr) != NULL) {
     line[strcspn(line, "\n")] = '\0';
-    printf("line is %s\n", line);
     line_token_ptr = line;
     htpasswd_field_ptr = strsep(&line_token_ptr, ":");
-    printf("htpasswd_field_ptr is %s\n", htpasswd_field_ptr);
     // Get the hash for the matched username and exit the while loop
     if (strcmp(htpasswd_field_ptr, openvpn_username) == 0) {
-      printf("Username matches!\n");
       htpasswd_hash_ptr = strsep(&line_token_ptr, ":");
       break;
     }
@@ -62,8 +59,10 @@ int main (int argc, char *argv[]) {
   // Compare the password from OpenVPN to the hash from the htpasswd file
   if (crypt_checkpass(openvpn_password, htpasswd_hash_ptr) == 0) {
     printf("Password is good!\n");
+    exit(0);
   } else {
     printf("Password is bad :(.\n");
+    exit(1);
   }
 
   return 0;

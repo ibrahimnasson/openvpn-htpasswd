@@ -41,6 +41,7 @@ int main (int argc, char *argv[]) {
   htpasswd_file_ptr = fopen(htpasswd_path, "r");
   if (htpasswd_file_ptr == NULL) {
     printf("Error reading from file %s: %s\n", htpasswd_path, strerror(errno));
+    exit(1);
   }
 
   // Find the line in the htpasswd file that matches the username from OpenVPN

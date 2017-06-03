@@ -11,7 +11,7 @@ int main (int argc, char *argv[]) {
   char htpasswd_path[] = "users.htpasswd";
   char *file_flag_ptr = NULL, *htpasswd_field_ptr = NULL, *line_token_ptr = NULL, *htpasswd_hash_ptr = NULL;
   char openvpn_username[100], openvpn_password[100], line[100];
-  FILE *openvpn_file_ptr, *htpasswd_file_ptr;
+  FILE *openvpn_file_ptr = NULL, *htpasswd_file_ptr = NULL;
 
   // Exit if there isn't exactly 1 argument
   if(argc != 2) {

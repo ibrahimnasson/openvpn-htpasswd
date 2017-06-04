@@ -7,6 +7,11 @@ tmp-file.example is an example of the temporary file that OpenVPN should provide
 
 users.htpasswd is an example of an htpasswd file that can be used for authentcation. There are three example username:password pairs in it for testing: user:test, user2:test2, and user3:test3. This file was generated with [htpasswd(1)](http://man.openbsd.org/OpenBSD-6.1/htpasswd) on OpenBSD 6.1.
 
+Disclaimer
+==========
+
+This is the first C program I've written since 2005. It is probably insecure and full of bugs.
+
 Compiling and using
 ===================
 

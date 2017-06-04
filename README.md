@@ -1,7 +1,7 @@
 openvpn-htpasswd
 ================
 
-A small C program to use with OpenVPN's auth-user-pass-verify configuration option and an htpasswd file. It will probably only work on OpenBSD because it uses the [crypt_checkpass(3)](http://man.openbsd.org/OpenBSD-6.1/crypt_checkpass) function.
+A small C program to use with OpenVPN's auth-user-pass-verify configuration option and an htpasswd file. It will probably only work on OpenBSD 5.6 and newer because it uses the [crypt_checkpass(3)](http://man.openbsd.org/OpenBSD-6.1/crypt_checkpass) function.
 
 tmp-file.example is an example of the temporary file that OpenVPN should provide as the first argument to the program if you use the "via-file" method. There is more detail in the [OpenVPN 2.4 man page](https://community.openvpn.net/openvpn/wiki/Openvpn24ManPage).
 

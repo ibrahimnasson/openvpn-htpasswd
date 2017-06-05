@@ -22,12 +22,17 @@
 
 int main(int argc, char *argv[]) {
 
-    /* Create some variables */
-    int openvpn_file_counter;
-    char htpasswd_path[] = "./var/openvpn/users.htpasswd";
-    char *file_flag_ptr = NULL, *htpasswd_field_ptr = NULL, *line_token_ptr = NULL, *htpasswd_hash_ptr = NULL;
-    char openvpn_username[100], openvpn_password[100], line[100];
-    FILE *openvpn_file_ptr = NULL, *htpasswd_file_ptr = NULL;
+    char *file_flag_ptr = NULL;         /* First command-line argument */
+    FILE *openvpn_file_ptr = NULL;      /* File provided by OpenVPN */
+    int openvpn_file_counter;           /* Counter for lines in file */
+    char openvpn_username[100];         /* First line from file */
+    char openvpn_password[100];         /* Second line from file */
+    FILE *htpasswd_file_ptr = NULL;     /* htpasswd file */
+    char htpasswd_path[] = "./var/openvpn/users.htpasswd";  /* Path to htpasswd file relative to OpenVPN daemon */
+    char line[100];                     /* Line from htpasswd file */
+    char *line_token_ptr = NULL;        /* Token to use with fgets() */
+    char *htpasswd_field_ptr = NULL;    /* First field from htpasswd file */
+    char *htpasswd_hash_ptr = NULL;     /* Second field from htpasswd file */
 
     /* Exit if there isn't exactly 1 argument */
     if(argc != 2) {
@@ -42,7 +47,7 @@ int main(int argc, char *argv[]) {
         printf("Error reading from file %s: %s\n", file_flag_ptr, strerror(errno));
         exit(1);
     }
-    for (openvpn_file_counter=0; openvpn_file_counter<2; ++openvpn_file_counter) {
+    for (openvpn_file_counter; openvpn_file_counter<2; ++openvpn_file_counter) {
         if (openvpn_file_counter == 0) {
             fgets(openvpn_username, sizeof(openvpn_username), openvpn_file_ptr);
             openvpn_username[strcspn(openvpn_username, "\n")] = '\0';

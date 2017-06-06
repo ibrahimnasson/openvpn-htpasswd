@@ -20,22 +20,22 @@
 #include <string.h>
 #include <unistd.h>
 
-void process_tmp_file(char *tmp_file, char *username, char *password) {
-    FILE *file_ptr;
+void process_tmp_file(char *tf, char *un, char *pw) {
+    FILE *fp;
     int i = 0;
-    file_ptr = fopen(tmp_file, "r");
-    if (file_ptr == NULL) {
-        printf("Error reading from file %s: %s\n", tmp_file, strerror(errno));
+    fp = fopen(tf, "r");
+    if (fp == NULL) {
+        printf("Error reading from file %s: %s\n", tf, strerror(errno));
         exit(1);
     }
     for (i; i<2; i++) {
         if (i == 0) {
-            fgets(username, sizeof(username), file_ptr);
-            username[strcspn(username, "\n")] = '\0';
+            fgets(un, sizeof(un), fp);
+            un[strcspn(un, "\n")] = '\0';
         }
         if (i == 1) {
-            fgets(password, sizeof(password), file_ptr);
-            password[strcspn(password, "\n")] = '\0';
+            fgets(pw, sizeof(pw), fp);
+            pw[strcspn(pw, "\n")] = '\0';
         }
     }
 }

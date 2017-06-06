@@ -15,7 +15,7 @@ This is the first C program I've written since 2005. It is probably insecure and
 Compiling and using
 ===================
 
-Compile an executable with ```gcc -static -o openvpn-htpasswd openvpn-htpasswd.c```. Copy the executable to ```/var/openvpn/openvpn-htpasswd``` (relative to the chroot, in my case ```/var/openvpn/chrootjail/var/openvpn/openvpn-htpasswd```) on your OpenVPN server. Generate an htpasswd file with ```htpasswd /var/openvpn/users.htpasswd <username>``` where ```<username>``` is the initial username you'd like to authorize to connect. Add the following lines to your OpenVPN server configuration:
+Compile an executable with ```gcc -static -o openvpn-htpasswd openvpn-htpasswd.c```. Copy the executable to ```/var/openvpn/openvpn-htpasswd``` (relative to the chroot, in my case ```/var/openvpn/chrootjail/var/openvpn/openvpn-htpasswd```) on your OpenVPN server. Generate an htpasswd file with ```htpasswd /var/openvpn/chrootjail/var/openvpn/users.htpasswd <username>``` where ```<username>``` is the initial username you'd like to authorize to connect. Add the following lines to your OpenVPN server configuration:
 
 ```
 script-security 2

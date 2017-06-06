@@ -22,16 +22,16 @@
 
 int main(int argc, char *argv[]) {
 
-    char *file_flag_ptr = NULL; /* First command-line argument */
-    FILE *openvpn_file_ptr = NULL; /* File provided by OpenVPN */
-    int openvpn_file_counter = 0; /* Counter for lines in file */
-    char openvpn_username[100]; /* First line from file */
-    char openvpn_password[100]; /* Second line from file */
-    FILE *htpasswd_file_ptr = NULL; /* htpasswd file */
+    char *arg_ptr = NULL; /* First command-line argument */
+    FILE *file_ptr = NULL; /* File provided by OpenVPN */
+    int line_counter = 0; /* Counter for lines in file */
+    char username[100]; /* First line from file */
+    char password[100]; /* Second line from file */
+    FILE *htpasswd_ptr = NULL; /* htpasswd file */
     char htpasswd_path[] = "./var/openvpn/users.htpasswd"; /* Path to htpasswd file relative to OpenVPN daemon */
     char line[100]; /* Line from htpasswd file */
     char *line_token_ptr = NULL; /* Token to use with fgets() */
-    char *htpasswd_field_ptr = NULL; /* First field from htpasswd file */
+    char *htpasswd_username_ptr = NULL; /* First field from htpasswd file */
     char *htpasswd_hash_ptr = NULL; /* Second field from htpasswd file */
 
     /* Exit if there isn't exactly 1 argument */
@@ -41,44 +41,44 @@ int main(int argc, char *argv[]) {
     }
 
     /* Load the temporary file from OpenVPN and get the username and password */
-    file_flag_ptr = argv[1];
-    openvpn_file_ptr = fopen(file_flag_ptr, "r");
-    if (openvpn_file_ptr == NULL) {
-        printf("Error reading from file %s: %s\n", file_flag_ptr, strerror(errno));
+    arg_ptr = argv[1];
+    file_ptr = fopen(arg_ptr, "r");
+    if (file_ptr == NULL) {
+        printf("Error reading from file %s: %s\n", arg_ptr, strerror(errno));
         exit(1);
     }
-    for (openvpn_file_counter; openvpn_file_counter<2; ++openvpn_file_counter) {
-        if (openvpn_file_counter == 0) {
-            fgets(openvpn_username, sizeof(openvpn_username), openvpn_file_ptr);
-            openvpn_username[strcspn(openvpn_username, "\n")] = '\0';
+    for (line_counter; line_counter<2; ++line_counter) {
+        if (line_counter == 0) {
+            fgets(username, sizeof(username), file_ptr);
+            username[strcspn(username, "\n")] = '\0';
         }
-        if (openvpn_file_counter == 1) {
-            fgets(openvpn_password, sizeof(openvpn_password), openvpn_file_ptr);
-            openvpn_password[strcspn(openvpn_password, "\n")] = '\0';
+        if (line_counter == 1) {
+            fgets(password, sizeof(password), file_ptr);
+            password[strcspn(password, "\n")] = '\0';
         }
     }
     
     /* Load the htpasswd file */
-    htpasswd_file_ptr = fopen(htpasswd_path, "r");
-    if (htpasswd_file_ptr == NULL) {
+    htpasswd_ptr = fopen(htpasswd_path, "r");
+    if (htpasswd_ptr == NULL) {
         printf("Error reading from file %s: %s\n", htpasswd_path, strerror(errno));
         exit(1);
     }
 
     /* Find the line in the htpasswd file that matches the username from OpenVPN */
-    while (fgets(line, sizeof(line), htpasswd_file_ptr) != NULL) {
+    while (fgets(line, sizeof(line), htpasswd_ptr) != NULL) {
         line[strcspn(line, "\n")] = '\0';
         line_token_ptr = line;
-        htpasswd_field_ptr = strsep(&line_token_ptr, ":");
+        htpasswd_username_ptr = strsep(&line_token_ptr, ":");
         /* Get the hash for the matched username and exit the while loop */
-        if (strcmp(htpasswd_field_ptr, openvpn_username) == 0) {
+        if (strcmp(htpasswd_username_ptr, username) == 0) {
             htpasswd_hash_ptr = strsep(&line_token_ptr, ":");
             break;
         }
     }
 
     /* Compare the password from OpenVPN to the hash from the htpasswd file */
-    if (crypt_checkpass(openvpn_password, htpasswd_hash_ptr) == 0) {
+    if (crypt_checkpass(password, htpasswd_hash_ptr) == 0) {
         printf("Password is good!\n");
         exit(0);
     } else {

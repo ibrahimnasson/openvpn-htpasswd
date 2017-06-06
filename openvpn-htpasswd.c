@@ -20,13 +20,30 @@
 #include <string.h>
 #include <unistd.h>
 
+void process_tmp_file(char *tmp_file, char *username, char *password) {
+    FILE *file_ptr;
+    int i = 0;
+    file_ptr = fopen(tmp_file, "r");
+    if (file_ptr == NULL) {
+        printf("Error reading from file %s: %s\n", tmp_file, strerror(errno));
+        exit(1);
+    }
+    for (i; i<2; i++) {
+        if (i == 0) {
+            fgets(username, sizeof(username), file_ptr);
+            username[strcspn(username, "\n")] = '\0';
+        }
+        if (i == 1) {
+            fgets(password, sizeof(password), file_ptr);
+            password[strcspn(password, "\n")] = '\0';
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
 
-    char *arg_ptr = NULL; /* First command-line argument */
-    FILE *file_ptr = NULL; /* File provided by OpenVPN */
-    int line_counter = 0; /* Counter for lines in file */
-    char username[100]; /* First line from file */
-    char password[100]; /* Second line from file */
+    char username[100];
+    char password[100];
     FILE *htpasswd_ptr = NULL; /* htpasswd file */
     char htpasswd_path[] = "./var/openvpn/users.htpasswd"; /* Path to htpasswd file relative to OpenVPN daemon */
     char line[100]; /* Line from htpasswd file */
@@ -41,22 +58,9 @@ int main(int argc, char *argv[]) {
     }
 
     /* Load the temporary file from OpenVPN and get the username and password */
-    arg_ptr = argv[1];
-    file_ptr = fopen(arg_ptr, "r");
-    if (file_ptr == NULL) {
-        printf("Error reading from file %s: %s\n", arg_ptr, strerror(errno));
-        exit(1);
-    }
-    for (line_counter; line_counter<2; ++line_counter) {
-        if (line_counter == 0) {
-            fgets(username, sizeof(username), file_ptr);
-            username[strcspn(username, "\n")] = '\0';
-        }
-        if (line_counter == 1) {
-            fgets(password, sizeof(password), file_ptr);
-            password[strcspn(password, "\n")] = '\0';
-        }
-    }
+    process_tmp_file(argv[1], username, password);
+    printf("username is %s\n", username);
+    printf("password is %s\n", password);
     
     /* Load the htpasswd file */
     htpasswd_ptr = fopen(htpasswd_path, "r");

@@ -14,8 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define CREDLENGTH 4096 /* Set maximum length for username and password */
-#define LINELENGTH 4096 /* Set maximum length for line from htpasswd file */
+#define MAX_LEN 4096 /* Set maximum length for username and password */
 
 #include <errno.h>
 #include <stdio.h>
@@ -38,9 +37,9 @@ void tmp_file(char *fn, char *un, char *pw) {
     while ((ll = getline(&lp, &ls, fp)) != -1) {
         lp[strcspn(lp, "\n")] = '\0';
         if (i == 0) {
-            strlcpy(un, lp, CREDLENGTH);
+            strlcpy(un, lp, MAX_LEN);
         } else if (i == 1) {
-            strlcpy(pw, lp, CREDLENGTH);
+            strlcpy(pw, lp, MAX_LEN);
         }
         ++i;
     }
@@ -68,7 +67,7 @@ void htpasswd_file(char *un, char *hash) {
         lp[strcspn(lp, "\n")] = '\0';
         un_ptr = strsep(&lp, ":");
         if (strcmp(un_ptr, un) == 0) {
-            strlcpy(hash, lp, CREDLENGTH);
+            strlcpy(hash, lp, MAX_LEN);
         }
     }
     free(lp);
@@ -76,9 +75,9 @@ void htpasswd_file(char *un, char *hash) {
 
 int main(int argc, char *argv[]) {
 
-    char username[CREDLENGTH];
-    char password[CREDLENGTH];
-    char hash[CREDLENGTH];
+    char username[MAX_LEN];
+    char password[MAX_LEN];
+    char hash[MAX_LEN];
 
     /* Exit if there isn't exactly 1 argument */
     if(argc != 2) {

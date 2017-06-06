@@ -29,7 +29,7 @@ void tmp_file(char *fn, char *un, char *pw) {
     char *lp = NULL;
     size_t ls = 0;
     fp = fopen(fn, "r");
-	if (fp == NULL) {
+    if (fp == NULL) {
         printf("Error reading from file %s: %s\n", fn, strerror(errno));
         exit(1);
     }
@@ -43,7 +43,7 @@ void tmp_file(char *fn, char *un, char *pw) {
         }
         ++i;
     }
-	free(lp);
+    free(lp);
     if (i != 2) {
         printf("Too many or too few lines in temp file. Exiting.\n");
         exit(1);

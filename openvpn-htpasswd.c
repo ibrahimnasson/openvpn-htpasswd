@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define MAX_LEN 4096 /* Set maximum length for username and password */
+#define MAX_LEN 4096
 
 #include <errno.h>
 #include <stdio.h>

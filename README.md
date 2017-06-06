@@ -30,7 +30,7 @@ auth-user-pass
 
 You should now be able to connect from a client and authenticate with the username and password you provided to the ```htpasswd``` command.
 
-To test the program without making any OpenVPN configuration changes, you can run ```openvpn-htpasswd tmp-file.example```. With copies of tmp-file.example and users.htpasswd from this repository, this should indicate that password authentication was successful. To test failure, edit tmp-file.example and provide a username and password that do not match any of the example pairs in users.htpasswd.
+To test the program without making any OpenVPN configuration changes, you can run ```openvpn-htpasswd tmp-file.example```. With a copy of tmp-file.example in the current directory and users.htpasswd in ./var/openvpn, this should indicate that password authentication was successful. To test failure, edit tmp-file.example and provide a username and password that do not match any of the example pairs in users.htpasswd.
 
 Resources
 =========

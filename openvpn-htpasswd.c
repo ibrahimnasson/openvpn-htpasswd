@@ -58,34 +58,29 @@ void tmp_file(char *fn, char *un, char *pw) {
 */
 void htpasswd_file(char *un, char *hash) {
     char fn[] = "./var/openvpn/users.htpasswd";
-    FILE *fp;
+    FILE *f_ptr;
     ssize_t ll;
     char *lp = NULL;
+    char buf[MAX_LEN];
+    char *buf_ptr = NULL;
     size_t ls = 0;
-    char *un_ptr;
-    char *hash_ptr;
-    fp = fopen(fn, "r");
-    if (fp == NULL) {
+    char *un_ptr = NULL;
+    char *hash_ptr = NULL;
+    f_ptr = fopen(fn, "r");
+    if (f_ptr == NULL) {
         printf("Error reading from file %s: %s\n", fn, strerror(errno));
         exit(1);
     }
-    while ((ll = getline(&lp, &ls, fp)) != -1) {
-        printf("\n1 %p\n", lp);
-        lp[strcspn(lp, "\n")] = '\0';
-        printf("\n2 %p\n", lp);
-        //strlcpy(&line_ptr, lp, MAX_LEN);
-        char *lp2 = lp;
-        un_ptr = strsep(&lp2, ":"); // Modifying my pointer!
-        printf("\n3 %p\n", lp);
+    while ((ll = getline(&lp, &ls, f_ptr)) != -1) {
+        buf_ptr = buf;
+        strlcpy(buf_ptr, lp, MAX_LEN);
+        buf_ptr[strcspn(buf_ptr, "\n")] = '\0';
+        un_ptr = strsep(&buf_ptr, ":"); // Modifying my pointer!
         if (strcmp(un_ptr, un) == 0) {
-            printf("\n4 %p\n", lp);
-            strlcpy(hash, lp2, MAX_LEN);
-            printf("\n5 %p\n", lp);
-            free(lp);
+            strlcpy(hash, buf_ptr, MAX_LEN);
             break;
         }
     }
-    printf("\noutside %p\n", lp);
     free(lp);
 }
 

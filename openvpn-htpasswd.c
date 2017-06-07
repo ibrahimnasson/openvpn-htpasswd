@@ -75,7 +75,7 @@ void htpasswd_file(char *un, char *hash) {
         buf_ptr = buf;
         strlcpy(buf_ptr, lp, MAX_LEN);
         buf_ptr[strcspn(buf_ptr, "\n")] = '\0';
-        un_ptr = strsep(&buf_ptr, ":"); // Modifying my pointer!
+        un_ptr = strsep(&buf_ptr, ":");
         if (strcmp(un_ptr, un) == 0) {
             strlcpy(hash, buf_ptr, MAX_LEN);
             break;

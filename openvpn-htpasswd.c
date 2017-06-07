@@ -74,7 +74,7 @@ void htpasswd_file(char *un, char *hash) {
         exit(1);
     }
     while ((ll = getline(&lp, &ls, fp)) != -1) {
-        strlcpy(buf, lp, MAX_LEN);
+        strlcpy(buf, lp, sizeof(buf));
         buf[strcspn(buf, "\n")] = '\0';
         buf_ptr = buf;
         un_ptr = strsep(&buf_ptr, ":");

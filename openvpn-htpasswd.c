@@ -31,6 +31,7 @@ void tmp_file(char *fn, char *un, char *pw) {
     ssize_t ll;
     char *lp = NULL;
     size_t ls = 0;
+    char buf[MAX_LEN];
     fp = fopen(fn, "r");
     if (fp == NULL) {
         printf("Error reading from file %s: %s\n", fn, strerror(errno));
@@ -38,11 +39,12 @@ void tmp_file(char *fn, char *un, char *pw) {
     }
     i = 0;
     while ((ll = getline(&lp, &ls, fp)) != -1) {
-        lp[strcspn(lp, "\n")] = '\0';
+        strlcpy(buf, lp, sizeof(buf));
+        buf[strcspn(buf, "\n")] = '\0';
         if (i == 0) {
-            strlcpy(un, lp, MAX_LEN);
+            strlcpy(un, buf, MAX_LEN);
         } else if (i == 1) {
-            strlcpy(pw, lp, MAX_LEN);
+            strlcpy(pw, buf, MAX_LEN);
         }
         ++i;
     }
@@ -72,9 +74,9 @@ void htpasswd_file(char *un, char *hash) {
         exit(1);
     }
     while ((ll = getline(&lp, &ls, fp)) != -1) {
+        strlcpy(buf, lp, MAX_LEN);
+        buf[strcspn(buf, "\n")] = '\0';
         buf_ptr = buf;
-        strlcpy(buf_ptr, lp, MAX_LEN);
-        buf_ptr[strcspn(buf_ptr, "\n")] = '\0';
         un_ptr = strsep(&buf_ptr, ":");
         if (strcmp(un_ptr, un) == 0) {
             strlcpy(hash, buf_ptr, MAX_LEN);

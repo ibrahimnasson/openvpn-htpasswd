@@ -22,6 +22,9 @@
 #include <string.h>
 #include <unistd.h>
 
+/*
+ * Read two lines from file fn. Store the first in un and the second in pw.
+*/
 void tmp_file(char *fn, char *un, char *pw) {
     FILE *fp;
     int i;
@@ -50,6 +53,9 @@ void tmp_file(char *fn, char *un, char *pw) {
     }
 }
 
+/*
+ * ?
+*/
 void htpasswd_file(char *un, char *hash) {
     char fn[] = "./var/openvpn/users.htpasswd";
     FILE *fp;
@@ -64,12 +70,22 @@ void htpasswd_file(char *un, char *hash) {
         exit(1);
     }
     while ((ll = getline(&lp, &ls, fp)) != -1) {
+        printf("\n1 %p\n", lp);
         lp[strcspn(lp, "\n")] = '\0';
-        un_ptr = strsep(&lp, ":");
+        printf("\n2 %p\n", lp);
+        //strlcpy(&line_ptr, lp, MAX_LEN);
+        char *lp2 = lp;
+        un_ptr = strsep(&lp2, ":"); // Modifying my pointer!
+        printf("\n3 %p\n", lp);
         if (strcmp(un_ptr, un) == 0) {
-            strlcpy(hash, lp, MAX_LEN);
+            printf("\n4 %p\n", lp);
+            strlcpy(hash, lp2, MAX_LEN);
+            printf("\n5 %p\n", lp);
+            free(lp);
+            break;
         }
     }
+    printf("\noutside %p\n", lp);
     free(lp);
 }
 
@@ -79,19 +95,15 @@ int main(int argc, char *argv[]) {
     char password[MAX_LEN];
     char hash[MAX_LEN];
 
-    /* Exit if there isn't exactly 1 argument */
     if(argc != 2) {
         printf("Too many or too few arguments. Exiting.\n");
         exit(1);
     }
 
-    /* Set username and password to values from temp file created by OpenVPN */
     tmp_file(argv[1], username, password);
 
-    /* Given username get the hash from htpasswd file */
     htpasswd_file(username, hash);
 
-    /* Compare the password to the hash */
     if (crypt_checkpass(password, hash) == 0) {
         printf("Password is good!\n");
         exit(0);

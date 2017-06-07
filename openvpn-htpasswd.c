@@ -100,9 +100,15 @@ int main(int argc, char *argv[]) {
     htpasswd_file(username, hash);
 
     if (crypt_checkpass(password, hash) == 0) {
+        explicit_bzero(username, MAX_LEN);
+        explicit_bzero(password, MAX_LEN);
+        explicit_bzero(hash, MAX_LEN);
         printf("Password is good!\n");
         exit(0);
     } else {
+        explicit_bzero(username, MAX_LEN);
+        explicit_bzero(password, MAX_LEN);
+        explicit_bzero(hash, MAX_LEN);
         printf("Password is bad :(.\n");
         exit(1);
     }

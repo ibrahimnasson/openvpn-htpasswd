@@ -38,10 +38,20 @@ void tmp_file(char *fn, char *un, char *pw) {
         exit(EXIT_FAILURE);
     }
     i = 0;
+    /*
+     * getline() uses realloc() to dynamically resize the memory used by lp.
+     * freezero() only exists in OpenBSD-current right now so we can use
+     * explicit_bzero() and free() on lp to make sure associated memory is
+     * securely zeroed out.
+    */
     while ((ll = getline(&lp, &ls, fp)) != -1) {
         strlcpy(buf, lp, sizeof(buf));
         if (strcspn(buf, "\n") == 0) {
             printf("Got an empty line from temp file. Exiting.\n");
+            explicit_bzero(un, MAX_LEN);
+            explicit_bzero(pw, MAX_LEN);
+            explicit_bzero(buf, MAX_LEN);
+            explicit_bzero(lp, strlen(lp));
             free(lp);
             exit(EXIT_FAILURE);
         }
@@ -53,9 +63,13 @@ void tmp_file(char *fn, char *un, char *pw) {
         }
         ++i;
     }
+    explicit_bzero(lp, strlen(lp));
     free(lp);
     if (i != 2) {
         printf("Too many or too few lines in temp file. Exiting.\n");
+        explicit_bzero(un, MAX_LEN);
+        explicit_bzero(pw, MAX_LEN);
+        explicit_bzero(buf, MAX_LEN);
         exit(EXIT_FAILURE);
     }
 }
@@ -75,6 +89,10 @@ void htpasswd_file(char *un, char *hash) {
     fp = fopen(fn, "r");
     if (fp == NULL) {
         printf("Error reading from file %s: %s\n", fn, strerror(errno));
+        /*
+         * Should probably return something and go back to main() here so
+         * we can explicit_bzero() sensitive stuff read from the temp file.
+        */
         exit(EXIT_FAILURE);
     }
     while ((ll = getline(&lp, &ls, fp)) != -1) {
@@ -87,6 +105,7 @@ void htpasswd_file(char *un, char *hash) {
             break;
         }
     }
+    explicit_bzero(lp, strlen(lp));
     free(lp);
 }
 
@@ -101,15 +120,15 @@ int main(int argc, char *argv[]) {
     tmp_file(argv[1], username, password);
     htpasswd_file(username, hash);
     if (crypt_checkpass(password, hash) == 0) {
-        explicit_bzero(username, MAX_LEN);
-        explicit_bzero(password, MAX_LEN);
-        explicit_bzero(hash, MAX_LEN);
+        explicit_bzero(username, sizeof(username));
+        explicit_bzero(password, sizeof(password));
+        explicit_bzero(hash, sizeof(hash));
         printf("Password is good!\n");
         return 0;
     } else {
-        explicit_bzero(username, MAX_LEN);
-        explicit_bzero(password, MAX_LEN);
-        explicit_bzero(hash, MAX_LEN);
+        explicit_bzero(username, sizeof(username));
+        explicit_bzero(password, sizeof(password));
+        explicit_bzero(hash, sizeof(hash));
         printf("Password is bad :(.\n");
         return 1;
     }

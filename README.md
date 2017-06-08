@@ -10,7 +10,7 @@ users.htpasswd is an example of an htpasswd file that can be used for authentcat
 Disclaimer
 ==========
 
-This is the first C program I've written since 2005. It is probably insecure and full of bugs.
+This is the first C program I've written since 2005. It is probably insecure and full of bugs. It is also being actively developed, so please don't use it for anything important.
 
 Compiling and using
 ===================

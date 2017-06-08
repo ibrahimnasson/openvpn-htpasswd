@@ -35,11 +35,16 @@ void tmp_file(char *fn, char *un, char *pw) {
     fp = fopen(fn, "r");
     if (fp == NULL) {
         printf("Error reading from file %s: %s\n", fn, strerror(errno));
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     i = 0;
     while ((ll = getline(&lp, &ls, fp)) != -1) {
         strlcpy(buf, lp, sizeof(buf));
+        if (strcspn(buf, "\n") == 0) {
+            printf("Got an empty line from temp file. Exiting.\n");
+            free(lp);
+            exit(EXIT_FAILURE);
+        }
         buf[strcspn(buf, "\n")] = '\0';
         if (i == 0) {
             strlcpy(un, buf, MAX_LEN);
@@ -51,7 +56,7 @@ void tmp_file(char *fn, char *un, char *pw) {
     free(lp);
     if (i != 2) {
         printf("Too many or too few lines in temp file. Exiting.\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -70,7 +75,7 @@ void htpasswd_file(char *un, char *hash) {
     fp = fopen(fn, "r");
     if (fp == NULL) {
         printf("Error reading from file %s: %s\n", fn, strerror(errno));
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     while ((ll = getline(&lp, &ls, fp)) != -1) {
         strlcpy(buf, lp, sizeof(buf));
@@ -86,33 +91,26 @@ void htpasswd_file(char *un, char *hash) {
 }
 
 int main(int argc, char *argv[]) {
-
     char username[MAX_LEN];
     char password[MAX_LEN];
     char hash[MAX_LEN];
-
     if(argc != 2) {
         printf("Too many or too few arguments. Exiting.\n");
-        exit(1);
+        return 1;
     }
-
     tmp_file(argv[1], username, password);
-
     htpasswd_file(username, hash);
-
     if (crypt_checkpass(password, hash) == 0) {
         explicit_bzero(username, MAX_LEN);
         explicit_bzero(password, MAX_LEN);
         explicit_bzero(hash, MAX_LEN);
         printf("Password is good!\n");
-        exit(0);
+        return 0;
     } else {
         explicit_bzero(username, MAX_LEN);
         explicit_bzero(password, MAX_LEN);
         explicit_bzero(hash, MAX_LEN);
         printf("Password is bad :(.\n");
-        exit(1);
+        return 1;
     }
-
-    return 0;
 } 

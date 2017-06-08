@@ -67,7 +67,6 @@ void htpasswd_file(char *un, char *hash) {
     char *buf_ptr = NULL;
     size_t ls = 0;
     char *un_ptr = NULL;
-    char *hash_ptr = NULL;
     fp = fopen(fn, "r");
     if (fp == NULL) {
         printf("Error reading from file %s: %s\n", fn, strerror(errno));

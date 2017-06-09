@@ -38,16 +38,29 @@ void tmp_file(char *fn, char *un, char *pw) {
         exit(EXIT_FAILURE);
     }
     i = 0;
-    /*
-     * getline() uses realloc() to dynamically resize the memory used by lp.
-     * freezero() only exists in OpenBSD-current right now so we can use
-     * explicit_bzero() and free() on lp to make sure associated memory is
-     * securely zeroed out.
-    */
     while ((ll = getline(&lp, &ls, fp)) != -1) {
+        /*
+         * Since we have to free() the memory used by lp later, we should be
+         * careful about potentially modifying it. If it's modified and then
+         * we try to free() it, we'll get a "modified chunk-pointer" error.
+         * None of the operations performed in this function should modify it,
+         * but copying it into buf before doing anything with it seems like a
+         * good idea anyway.
+         *
+         * Using strlcpy safely copies at most MAX_LEN-1 characters into buf.
+         * If either line in the file is more than MAX_LEN-1 characters it is
+         * silently truncated. We could check the return value of strlcpy()
+         * to provide a friendlier and more accurate error in this case.
+        */
         strlcpy(buf, lp, sizeof(buf));
         if (strcspn(buf, "\n") == 0) {
             printf("Got an empty line from temp file. Exiting.\n");
+            /*
+             * getline() uses realloc() to dynamically resize the memory used by
+             * lp. freezero() only exists in OpenBSD-current right now so we'll
+             * use explicit_bzero() and free() on lp to make sure associated
+             * memory is securely zeroed out.
+            */
             explicit_bzero(un, MAX_LEN);
             explicit_bzero(pw, MAX_LEN);
             explicit_bzero(buf, MAX_LEN);
@@ -55,6 +68,12 @@ void tmp_file(char *fn, char *un, char *pw) {
             free(lp);
             exit(EXIT_FAILURE);
         }
+        /*
+         * This method of removing the line break character from a string is
+         * from the fgets() and strcspn() man pages. strcscpn() returns the
+         * index of the array where "\n" occurs, and assigns the NUL character
+         * to it.
+        */
         buf[strcspn(buf, "\n")] = '\0';
         if (i == 0) {
             strlcpy(un, buf, MAX_LEN);
@@ -63,8 +82,16 @@ void tmp_file(char *fn, char *un, char *pw) {
         }
         ++i;
     }
+    /*
+     * Now that we've read all lines from the file, zero out memory that's
+     * been allocated for lp, and free() it.
+    */
     explicit_bzero(lp, strlen(lp));
     free(lp);
+    /*
+     * There shouldn't be more or fewer than two lines in the file, so if our
+     * counter is isn't exactly 2, zero out un, pw, and buf, and exit.
+    */
     if (i != 2) {
         printf("Too many or too few lines in temp file. Exiting.\n");
         explicit_bzero(un, MAX_LEN);
@@ -110,6 +137,11 @@ void htpasswd_file(char *un, char *hash) {
 }
 
 int main(int argc, char *argv[]) {
+    /*
+     * Declare fixed-size character arrays to store a username and password
+     * from the temporary file provided by OpenVPN, and a hash from the
+     * htpasswd file.
+    */
     char username[MAX_LEN];
     char password[MAX_LEN];
     char hash[MAX_LEN];

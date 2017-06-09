@@ -123,8 +123,20 @@ void htpasswd_file(char *un, char *hash) {
         exit(EXIT_FAILURE);
     }
     while ((ll = getline(&lp, &ls, fp)) != -1) {
+        /*
+         * Unlike tmp_file(), this function uses strsep which modifies its
+         * first argument, in this case &buf_ptr, so it's important to copy
+         * lp into buf here.
+         * 
+         * This function will also silently truncate a line from the htpasswd
+         * file into MAX_LEN-1 characters.
+        */
         strlcpy(buf, lp, sizeof(buf));
         buf[strcspn(buf, "\n")] = '\0';
+        /*
+         * I'd like to explain why we need buf_ptr but I need to understand it
+         * better before making a useful comment.
+        */
         buf_ptr = buf;
         un_ptr = strsep(&buf_ptr, ":");
         if (strcmp(un_ptr, un) == 0) {

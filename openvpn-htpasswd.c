@@ -128,17 +128,30 @@ void htpasswd_file(char *un, char *hash) {
          * first argument, in this case &buf_ptr, so it's important to copy
          * lp into buf here.
          * 
-         * This function will also silently truncate a line from the htpasswd
-         * file into MAX_LEN-1 characters.
+         * This function will also (like tmp_file()) silently truncate a line
+         * from the htpasswd file into MAX_LEN-1 characters.
         */
         strlcpy(buf, lp, sizeof(buf));
         buf[strcspn(buf, "\n")] = '\0';
         /*
-         * I'd like to explain why we need buf_ptr but I need to understand it
-         * better before making a useful comment.
+         * strsep() replaces the first instance of the delimiter character (in
+         * this case ":") with the NUL character '\0', updates its first
+         * argument buf_ptr to point to the first character *after* the
+         * delimiter, and returns the original value of buf_ptr.
+         *
+         * Because it works on pointers, we can't pass buf to it directly.
+         *
+         * un_ptr ends up pointing to the first character of the character
+         * array buf and buf_ptr ends up pointing to the first character
+         * after the first ":" in buf (the first character of the hash).
         */
         buf_ptr = buf;
         un_ptr = strsep(&buf_ptr, ":");
+        /*
+         * If the NUL-terminated strings pointed to by un_ptr and un match,
+         * we've found a matching line in the htpasswd file, copy the hash
+         * (pointed to by buf_ptr) into hash, and break out of the while loop.
+        */
         if (strcmp(un_ptr, un) == 0) {
             strlcpy(hash, buf_ptr, MAX_LEN);
             break;
@@ -161,8 +174,20 @@ int main(int argc, char *argv[]) {
         printf("Too many or too few arguments. Exiting.\n");
         return 1;
     }
+    /*
+     * tmp_file() opens the file at the path in argv[1] and populates username
+     * and password from the first and second lines, respectively.
+    */
     tmp_file(argv[1], username, password);
+    /*
+     * htpasswd_file() finds the line matching username in the htpasswd file
+     * and populates hash with the hash from that line.
+    */
     htpasswd_file(username, hash);
+    /*
+     * If the password from the temporary file matches the hash from the
+     * htpasswd file, return 0 to indicate authentication success.
+    */
     if (crypt_checkpass(password, hash) == 0) {
         explicit_bzero(username, sizeof(username));
         explicit_bzero(password, sizeof(password));

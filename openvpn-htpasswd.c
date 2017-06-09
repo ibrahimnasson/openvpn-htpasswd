@@ -165,6 +165,10 @@ int main(int argc, char *argv[]) {
     char username[MAX_LEN];
     char password[MAX_LEN];
     char hash[MAX_LEN];
+    /*
+     * Use pledge() because why not. We can probably add some paths for the
+     * second argument here, but I don't know what they are yet.
+    */
     if (pledge("stdio rpath", NULL) == -1) {
         err(1, "pledge");
     }

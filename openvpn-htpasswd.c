@@ -104,7 +104,7 @@ void tmp_file(char *fn, char *un, char *pw) {
 /*
  * Read lines from file fn until un is found and store associated hash.
 */
-void htpasswd_file(char *un, char *hash) {
+int htpasswd_file(char *un, char *hash) {
     char fn[] = "./var/openvpn/users.htpasswd"; /* Path to the htpasswd file */
     FILE *fp; /* Pointer to htpasswd file */
     ssize_t ll; /* Line length returned by getline() */
@@ -116,11 +116,7 @@ void htpasswd_file(char *un, char *hash) {
     fp = fopen(fn, "r");
     if (fp == NULL) {
         printf("Error reading from file %s: %s\n", fn, strerror(errno));
-        /*
-         * Should probably return something and go back to main() here so
-         * we can explicit_bzero() sensitive stuff read from the temp file.
-        */
-        exit(EXIT_FAILURE);
+        return 1;
     }
     while ((ll = getline(&lp, &ls, fp)) != -1) {
         /*
@@ -159,6 +155,7 @@ void htpasswd_file(char *un, char *hash) {
     }
     explicit_bzero(lp, strlen(lp));
     free(lp);
+    return 0;
 }
 
 int main(int argc, char *argv[]) {
@@ -181,9 +178,15 @@ int main(int argc, char *argv[]) {
     tmp_file(argv[1], username, password);
     /*
      * htpasswd_file() finds the line matching username in the htpasswd file
-     * and populates hash with the hash from that line.
+     * and populates hash with the hash from that line. If it has a problem
+     * reading the file (doesn't return 0), zero out sensitive data.
     */
-    htpasswd_file(username, hash);
+    if (htpasswd_file(username, hash) != 0) {
+        explicit_bzero(username, sizeof(username));
+        explicit_bzero(password, sizeof(password));
+        explicit_bzero(hash, sizeof(hash));
+        return 1;
+    }
     /*
      * If the password from the temporary file matches the hash from the
      * htpasswd file, return 0 to indicate authentication success.

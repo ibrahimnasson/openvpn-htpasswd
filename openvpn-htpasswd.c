@@ -26,12 +26,12 @@
  * Read two lines from file fn. Store the first in un and the second in pw.
 */
 void tmp_file(char *fn, char *un, char *pw) {
-    FILE *fp;
-    int i;
-    ssize_t ll;
-    char *lp = NULL;
-    size_t ls = 0;
-    char buf[MAX_LEN];
+    FILE *fp; /* Pointer to OpenVPN temporary file */
+    int i; /* Counter for while loop */
+    ssize_t ll; /* Line length returned by getline() */
+    char *lp = NULL; /* For getline() to store stream data */
+    size_t ls = 0; /* The size of the memory allocated by getline */
+    char buf[MAX_LEN]; /* A buffer to copy the lines into */
     fp = fopen(fn, "r");
     if (fp == NULL) {
         printf("Error reading from file %s: %s\n", fn, strerror(errno));
@@ -105,14 +105,14 @@ void tmp_file(char *fn, char *un, char *pw) {
  * Read lines from file fn until un is found and store associated hash.
 */
 void htpasswd_file(char *un, char *hash) {
-    char fn[] = "./var/openvpn/users.htpasswd";
-    FILE *fp;
-    ssize_t ll;
-    char *lp = NULL;
-    char buf[MAX_LEN];
-    char *buf_ptr = NULL;
-    size_t ls = 0;
-    char *un_ptr = NULL;
+    char fn[] = "./var/openvpn/users.htpasswd"; /* Path to the htpasswd file */
+    FILE *fp; /* Pointer to htpasswd file */
+    ssize_t ll; /* Line length returned by getline() */
+    char *lp = NULL; /* For getline() to store stream data */
+    char buf[MAX_LEN]; /* Buffer to copy lines into */
+    char *buf_ptr = NULL; /* Pointer to use with strsep */
+    size_t ls = 0; /* The size of the memory allocated by getline() */
+    char *un_ptr = NULL; /* Pointer to use for the first field from htpasswd */
     fp = fopen(fn, "r");
     if (fp == NULL) {
         printf("Error reading from file %s: %s\n", fn, strerror(errno));

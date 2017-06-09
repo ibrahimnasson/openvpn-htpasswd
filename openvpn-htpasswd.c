@@ -16,6 +16,7 @@
 
 #define MAX_LEN 4096
 
+#include <err.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,8 +35,7 @@ void tmp_file(char *fn, char *un, char *pw) {
     char buf[MAX_LEN]; /* A buffer to copy the lines into */
     fp = fopen(fn, "r");
     if (fp == NULL) {
-        printf("Error reading from file %s: %s\n", fn, strerror(errno));
-        exit(EXIT_FAILURE);
+        err(1, "Error reading from file %s", fn);
     }
     i = 0;
     while ((ll = getline(&lp, &ls, fp)) != -1) {
@@ -54,7 +54,6 @@ void tmp_file(char *fn, char *un, char *pw) {
         */
         strlcpy(buf, lp, sizeof(buf));
         if (strcspn(buf, "\n") == 0) {
-            printf("Got an empty line from temp file. Exiting.\n");
             /*
              * getline() uses realloc() to dynamically resize the memory used by
              * lp. freezero() only exists in OpenBSD-current right now so we'll
@@ -66,7 +65,7 @@ void tmp_file(char *fn, char *un, char *pw) {
             explicit_bzero(buf, MAX_LEN);
             explicit_bzero(lp, strlen(lp));
             free(lp);
-            exit(EXIT_FAILURE);
+            err(1, "Got an empty line from temp file.");
         }
         /*
          * This method of removing the line break character from a string is
@@ -93,11 +92,10 @@ void tmp_file(char *fn, char *un, char *pw) {
      * counter is isn't exactly 2, zero out un, pw, and buf, and exit.
     */
     if (i != 2) {
-        printf("Too many or too few lines in temp file. Exiting.\n");
         explicit_bzero(un, MAX_LEN);
         explicit_bzero(pw, MAX_LEN);
         explicit_bzero(buf, MAX_LEN);
-        exit(EXIT_FAILURE);
+        err(1, "Too many or too few lines in temp file.");
     }
 }
 
@@ -167,9 +165,11 @@ int main(int argc, char *argv[]) {
     char username[MAX_LEN];
     char password[MAX_LEN];
     char hash[MAX_LEN];
-    if(argc != 2) {
-        printf("Too many or too few arguments. Exiting.\n");
-        return 1;
+    if (pledge("stdio rpath", NULL) == -1) {
+        err(1, "pledge");
+    }
+    if (argc != 2) {
+        err(1, "Too many or too few arguments.");
     }
     /*
      * tmp_file() opens the file at the path in argv[1] and populates username

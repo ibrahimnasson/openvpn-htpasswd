@@ -112,8 +112,7 @@ int htpasswd_file(char *un, char *hash) {
     char *un_ptr = NULL; /* Pointer to use for the first field from htpasswd */
     fp = fopen(fn, "r");
     if (fp == NULL) {
-        printf("Error reading from file %s: %s\n", fn, strerror(errno));
-        return 1;
+        err(1, "Error reading from file %s", fn);
     }
     while ((ll = getline(&lp, &ls, fp)) != -1) {
         /*
